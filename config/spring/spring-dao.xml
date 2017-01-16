@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context  
+    http://www.springframework.org/schema/context/spring-context.xsd">
+	
+	
+	<!-- 整合mybatis -->
+	   <!--1、配置数据库相关参数-->    <!-- ignore-unresolvable：是否忽略解析不到的属性，如果不忽略，找不到将抛出异常  -->
+	<context:property-placeholder location="classpath:jdbc.properties" ignore-unresolvable="true"/>
+	
+	<!--2.数据源druid -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+		<property name="username" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+		<property name="url" value="${jdbc.url}"></property>
+		<property name="driverClassName" value="${jdbc.driverClassName}"></property>
+		    <!-- 最大连接数 -->  
+		<property name="maxActive" value="${druid.pool.size.max}"></property>
+		    <!-- 最小连接数 -->  
+		<property name="minIdle" value="${druid.pool.size.min}"></property>
+		    <!-- 初始化连接数量 -->  
+		<property name="initialSize" value="${druid.pool.size.init}"></property>
+		   <!-- 配置监控统计拦截的filters，wall用于防止sql注入，stat用于统计分析 -->
+		<property name="filters" value="wall,stat"></property>
+	</bean>
+	
+	 <!--3、配置SqlSessionFactory对象-->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+			<!-- 注入数据源 -->
+		<property name="dataSource" ref="dataSource"></property>
+		  <!--配置mybatis全局配置文件:mybatis-config.xml-->
+		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
+		<!-- 配置实体类别名 -->
+		<property name="typeAliasesPackage" value="com.jumpw.entity"></property>
+		<!-- 配置mapper -->
+		<property name="mapperLocations" value="classpath:mapper/*.xml"></property>
+	</bean>
+	
+	
+	    <!--4、配置扫描Dao接口包,动态实现DAO接口,注入到spring容器-->
+	 <bean  class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+	 	<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+	 	<property name="basePackage" value="com.jumpw.dao"></property>
+	 </bean>
+</beans>
